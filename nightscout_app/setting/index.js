@@ -4,7 +4,7 @@ import { gettext } from 'i18n';
 const DEFAULT_SETTINGS = {
   urlConfig: '',
   accessToken: '',
-  updateInterval: 60 // Default interval in minutes
+  updateInterval: 3 // Default interval in minutes
 };
 
 AppSettingsPage({
@@ -75,12 +75,14 @@ AppSettingsPage({
           }
         },"Tap a setting to change it"),
         TextInput({
-          label: gettext('URL Configuration'),
+          label: gettext('Nightscout Server URL'),
+          placeholder: 'https://my.nightscoutserver.com',
           value: this.state.settings.urlConfig,
           labelStyle: {
             fontWeight: "bold"
           },
           subStyle: {
+            minHeight: "30px",  
             textDecoration: "underline",
             marginBottom: "10px",
             padding: "5px",
@@ -94,11 +96,13 @@ AppSettingsPage({
         }),
         TextInput({
           label: gettext('Access token'),
+          placeholder: 'tokenname-7d4770f5493dcf43',
           value: this.state.settings.accessToken,
           labelStyle: {
             fontWeight: "bold"
           },
           subStyle: {
+            minHeight: "30px", 
             textDecoration: "underline",
             marginBottom: "10px",
             padding: "5px",
@@ -111,6 +115,7 @@ AppSettingsPage({
           }
         }),        
         TextInput({
+          minHeight: "30px", 
           label: gettext('Update Interval (minutes)'),
           value: String(this.state.settings.updateInterval),
           labelStyle: {
@@ -132,7 +137,26 @@ AppSettingsPage({
               console.log("Invalid interval. It must be a positive number.");
             }
           }
-        })
+        }),
+        Text({
+          paragraph: true,
+          style: {
+            paddingTop: "20px",
+            paddingBottom: "10px",
+            fontSize: "12px"
+          }
+        },"ZeppOS Nightscout app by Adam Dinneen 2024"),
+        Link({
+          source: "https://github.com/adamd9/zeppos-nightscout",
+        },"GitHub Project"),
+        Text({
+          paragraph: false,
+          style: {
+          }
+        }," | "),
+        Link({
+          source: "mailto:adam@greatmachineinthesky.com?subject=Nightscout%20Menu%20Bar%20-%20Report%20an%20Issue&body=Nightscout%20URL:%20+%20nightscoutUrl%0APlease%20provide%20a%20description%20of%20the%20issue.%20Leaving%20your%20Nightscout%20URL%20included%20means%20that%20the%20developer%20can%20replicate%20the%20issue%20and%20fix%20it.%0A%0ADescription%20of%20issue:%20",
+        },"Report an issue"),
       ]
     );
   }

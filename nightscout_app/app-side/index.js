@@ -29,8 +29,7 @@ const DEFAULT_SETTINGS = {
 
 const fetchInfo = async (ctx, url) => {
     let resp = {};
-    console.log("ADAMXXXXXXX", url);
-
+    console.log("App-side: Fetching data")
     await fetch({
         url: url,
         method: "GET",

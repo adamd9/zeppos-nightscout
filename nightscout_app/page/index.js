@@ -312,6 +312,7 @@ class Watchdrip {
             if (data.error) {
                 debug.log("Error");
                 debug.log(data);
+                this.showMessage("Error: " + data.message);
                 return;
             }
 

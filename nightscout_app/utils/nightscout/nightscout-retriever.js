@@ -18,49 +18,48 @@ export class NightscoutRetriever {
     }
 
     fetchInfo(callback) {
-        logger.log("fetchInfoRetriever")
+        try {
+            logger.log("fetchInfoRetriever")
 
-        this.resetLastUpdate();
-
-        if (messageBuilder.connectStatus() === false) {
-            logger.log("No BT Connection");
-            if (isDisplay) {
-                //this.showMessage(getText("status_no_bt"));
-            } else {
+            this.resetLastUpdate();
+            if (messageBuilder.connectStatus() === false) {
+                logger.log("No BT Connection");
+                if (isDisplay) {
+                    //this.showMessage(getText("status_no_bt"));
+                } else {
+                }
+                callback({error: true, message: "No BT Connection"})
             }
-            return;
+    
+            logger.log('fetchInfoRetriever: building message')
+            messageBuilder.request({
+                    method: Commands.getInfo
+                }, { timeout: 5000 })
+                .then((data) => {
+                    logger.log("fetchInfoRetriever: retriever received data from side-service", data);
+                    let { result: info = {} } = data;
+    
+                    try {
+                        if (info.error) {
+                            logger.log("fetchInfoRetriever: Error");
+                            logger.log(info);
+                            callback({error: true, message: info.message})
+                        }    
+                        callback(info)
+                    } catch (e) {
+                        logger.log("fetchInfoRetriever: error:" + e);
+                    }
+                })
+                .catch((error) => {
+                    logger.log("fetchInfoRetriever: fetch error:" + error);
+                })
+                .finally(() => {
+    
+                });            
+        } catch (error) {
+            callback({error: true, message: error})
         }
 
-        logger.log('building message')
-        messageBuilder.request({
-                method: Commands.getInfo
-            }, { timeout: 5000 })
-            .then((data) => {
-                logger.log("retriever received data from side-service", data);
-                let { result: info = {} } = data;
-
-                try {
-                    if (info.error) {
-                        logger.log("Error");
-                        logger.log(info);
-                        return;
-                    }
-
-                    hmFS.SysProSetChars('fs_last_info', JSON.stringify(info))
-
-                    let dataInfo = info;
-                    // this.lastInfoUpdate = this.saveInfo(dataInfo); // Assume saveInfo is a method of the class
-                    callback(info)
-                } catch (e) {
-                    logger.log("error:" + e);
-                }
-            })
-            .catch((error) => {
-                logger.log("fetch error:" + error);
-            })
-            .finally(() => {
-
-            });
     }
 
     // Placeholder methods for those called within fetchInfo

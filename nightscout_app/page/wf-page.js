@@ -64,11 +64,19 @@ class Watchdrip {
     }
 
     retrieve_complete(info) {
+        if(!info) {
+            debug.log("Something went wrong retrieving the data")
+        } else {
+        if (info && info.error) {
+            debug.log("Error retrieving data", info.message)
+        }
         if (info && info.settings && info.settings.updateInterval && 
             info.settings.updateInterval !== this.conf.alarmSettings.fetchInterval / 60) {
                 logger.log("Update interval (minutes) setting updated from app settings:", info.settings.updateInterval + " minutes")
                 this.conf.alarmSettings.fetchInterval = info.settings.updateInterval * 60
             }
+            hmFS.SysProSetChars('fs_last_info', JSON.stringify(info))
+        }
         this.hide_page();
     }
 

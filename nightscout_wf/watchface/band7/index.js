@@ -1,5 +1,5 @@
-import {BG_IMG, BG_FILL_RECT} from "../../utils/config/styles_global";
-import {NIGHTSCOUT_APP_ID} from "../../utils/config/global-constants"
+import { BG_IMG, BG_FILL_RECT } from "../../utils/config/styles_global";
+import { NIGHTSCOUT_APP_ID } from "../../utils/config/global-constants"
 import {
   DIGITAL_TIME,
   DIGITAL_TIME_AOD,
@@ -11,9 +11,9 @@ import {
   BG_TIME_TEXT,
   BG_TREND_IMAGE
 } from "./styles";
-import {str2json} from "../../shared/data";
+import { str2json } from "../../shared/data";
 
-const logger =  getApp()._options.globalData.logger
+const logger = getApp()._options.globalData.logger
 
 let bgValTextImgWidget, bgValTimeTextWidget
 let timerLastUpdated, currTime;
@@ -35,7 +35,7 @@ WatchFace({
       function () {
         currTime = Date.now()
         if (currTime - timerLastUpdated > 1200) {
-        logger.log(`awoken! curr: ${currTime}, last: ${timerLastUpdated}, diff: ${currTime - timerLastUpdated}`);
+          logger.log(`awoken! curr: ${currTime}, last: ${timerLastUpdated}, diff: ${currTime - timerLastUpdated}`);
           try {
             self.updateValues()
           } catch (error) {
@@ -47,7 +47,7 @@ WatchFace({
       },
     )
 
-    
+
   },
 
   build() {
@@ -59,10 +59,10 @@ WatchFace({
 
   initView() {
     screenType = hmSetting.getScreenType();
-    if (screenType === hmSetting.screen_type.AOD) {        
-        const digitalClock = hmUI.createWidget(hmUI.widget.IMG_TIME, mergeStyles(DIGITAL_TIME, DIGITAL_TIME_AOD));
+    if (screenType === hmSetting.screen_type.AOD) {
+      const digitalClock = hmUI.createWidget(hmUI.widget.IMG_TIME, mergeStyles(DIGITAL_TIME, DIGITAL_TIME_AOD));
     } else {
-        const digitalClock = hmUI.createWidget(hmUI.widget.IMG_TIME, DIGITAL_TIME);
+      const digitalClock = hmUI.createWidget(hmUI.widget.IMG_TIME, DIGITAL_TIME);
     };
 
     const daysImg = hmUI.createWidget(hmUI.widget.IMG_WEEK, WEEK_DAYS_IMG);
@@ -72,27 +72,27 @@ WatchFace({
     if (screenType === hmSetting.screen_type.AOD) {
       //removed mergstyles to see if it fixes
       bgValTextImgWidget = hmUI.createWidget(hmUI.widget.TEXT_IMG, BG_VALUE_TEXT_IMG_AOD);
-  } else {
+    } else {
       bgValTextImgWidget = hmUI.createWidget(hmUI.widget.TEXT_IMG, BG_VALUE_TEXT_IMG);
-  };
+    };
 
-//   if (screenType === hmSetting.screen_type.AOD) {
-//     logger.log("IS_AOD_TRUE");
-//     if (this.intervalTimer !== null) return; //already started
-      
-//     const interval = 180000
+    //   if (screenType === hmSetting.screen_type.AOD) {
+    //     logger.log("IS_AOD_TRUE");
+    //     if (this.intervalTimer !== null) return; //already started
 
-//     logger.log("startTimerDataUpdates, interval: " + interval);
-    
-//     this.intervalTimer = this.getGlobal().setInterval(() => {
-//       logger.log("updating AOD")
-//         this.updateValues();
-//     }, interval);
-// }
+    //     const interval = 180000
 
-  bgValTimeTextWidget = hmUI.createWidget(hmUI.widget.TEXT, BG_TIME_TEXT);
+    //     logger.log("startTimerDataUpdates, interval: " + interval);
 
-  hmUI.createWidget(hmUI.widget.BUTTON, {
+    //     this.intervalTimer = this.getGlobal().setInterval(() => {
+    //       logger.log("updating AOD")
+    //         this.updateValues();
+    //     }, interval);
+    // }
+
+    bgValTimeTextWidget = hmUI.createWidget(hmUI.widget.TEXT, BG_TIME_TEXT);
+
+    hmUI.createWidget(hmUI.widget.BUTTON, {
       x: 42,
       y: 280,
       w: 120,
@@ -118,38 +118,51 @@ WatchFace({
   updateValues() {
     logger.log('updating values')
     const fsLatestInfo = hmFS.SysProGetChars('fs_last_info')
-        if (fsLatestInfo) {
-          const dataInfo = str2json(fsLatestInfo)
-          logger.log("got latest info from FS", fsLatestInfo)
-          bgValTextImgWidget.setProperty(hmUI.prop.VISIBLE, true)
-          bgValTextImgWidget.setProperty(hmUI.prop.TEXT, dataInfo.bg.val)
-          let bgTimeInMinutes;
+    logger.log("got latest info from FS", fsLatestInfo)
+    let dataInfo
+    if (fsLatestInfo) {
+      dataInfo = str2json(fsLatestInfo)
+      logger.log('dataInfo', dataInfo)
+    }
+    if (dataInfo && !dataInfo.error) {
+      bgValTextImgWidget.setProperty(hmUI.prop.VISIBLE, true)
+      bgValTextImgWidget.setProperty(hmUI.prop.TEXT, dataInfo.bg.val)
+      let bgTimeInMinutes;
 
-          if (dataInfo && dataInfo.bg && typeof dataInfo.bg.time === 'number') {
-            const currentTime = Date.now(); // Current time in milliseconds
-            const differenceInMillis = currentTime - dataInfo.bg.time; // Difference in milliseconds
-          
-            // Convert milliseconds to minutes
-            bgTimeInMinutes = Math.round(differenceInMillis / 60000);
-          } else {
-            // Handle cases where bg or bg.time is not available or not a valid timestamp
-            console.error('Invalid or missing bg.time value')
-          }
+      if (dataInfo && dataInfo.bg && typeof dataInfo.bg.time === 'number') {
+        const currentTime = Date.now(); // Current time in milliseconds
+        const differenceInMillis = currentTime - dataInfo.bg.time; // Difference in milliseconds
 
-          bgValTimeTextWidget.setProperty(hmUI.prop.VISIBLE, true)
-          bgValTimeTextWidget.setProperty(hmUI.prop.TEXT, bgTimeInMinutes.toString() + ' min')
+        // Convert milliseconds to minutes
+        bgTimeInMinutes = Math.round(differenceInMillis / 60000);
+      } else {
+        // Handle cases where bg or bg.time is not available or not a valid timestamp
+        console.error('Invalid or missing bg.time value')
+      }
 
-          bgTrendImageWidget.setProperty(hmUI.prop.SRC, this.getArrowResource(dataInfo.bg.trend));
-        }
+      bgValTimeTextWidget.setProperty(hmUI.prop.VISIBLE, true)
+      bgValTimeTextWidget.setProperty(hmUI.prop.TEXT, bgTimeInMinutes.toString() + ' min')
+
+      bgTrendImageWidget.setProperty(hmUI.prop.SRC, this.getArrowResource(dataInfo.bg.trend));
+    } else {
+      logger.log("latest info is an error", dataInfo)
+      bgValTextImgWidget.setProperty(hmUI.prop.VISIBLE, true)
+      bgValTextImgWidget.setProperty(hmUI.prop.TEXT, "...")
+
+      bgTrendImageWidget.setProperty(hmUI.prop.SRC, "None");
+
+      bgValTimeTextWidget.setProperty(hmUI.prop.VISIBLE, true)
+      bgValTimeTextWidget.setProperty(hmUI.prop.TEXT, dataInfo.message)
+    }
   },
 
   getArrowResource(trend) {
     let fileName = trend;
     if (fileName === undefined || fileName === "") {
-        fileName = "None";
+      fileName = "None";
     }
     return `nightscout/arrows/${fileName}.png`;
-},
+  },
 
   onShow() {
     logger.log('index.js on show')
