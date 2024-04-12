@@ -1,6 +1,6 @@
 import {ALARM_UPDATE_INTERVAL} from "./constants";
 
-export const NIGHTSCOUT_APP_ID = "189933";
+export const NIGHTSCOUT_APP_ID = "1051061";
 
 
  export const WF_DIR = "/storage/js_apps/data/nightscout";

@@ -1,7 +1,7 @@
 {
   "configVersion": "v2",
   "app": {
-    "appId": 10013,
+    "appId": 1051097,
     "appName": "Nightscout Watchface",
     "appType": "watchface",
     "version": {
