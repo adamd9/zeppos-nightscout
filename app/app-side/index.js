@@ -6,7 +6,8 @@ const messageBuilder = new MessageBuilder();
 
 const DEFAULT_SETTINGS = {
     urlConfig: '',
-    updateInterval: 3 // Default interval in minutes
+    updateInterval: 3, // Default interval in minutes
+    disableUpdates: false,
   };
 
   function getUrlConfig() {
@@ -27,8 +28,23 @@ const DEFAULT_SETTINGS = {
       DEFAULT_SETTINGS.updateInterval;
   }
 
+  function getDisableUpdates() {
+    return settings.settingsStorage.getItem('disableUpdates') ?
+      JSON.parse(settings.settingsStorage.getItem('disableUpdates')) :
+      DEFAULT_SETTINGS.disableUpdates;
+  }
+
 const fetchInfo = async (ctx, url) => {
     let resp = {};
+    if (getDisableUpdates() === true) {
+        resp = {error: true, message: "Updates disabled in Phone ZeppOS App"};
+        const jsonDisabledResp = {data: {result: resp}};
+        if (ctx !== false) {
+            ctx.response(jsonDisabledResp);
+        } else {
+            return jsonDisabledResp;
+        }
+    }
     console.log("App-side: Fetching data")
     await fetch({
         url: url,
@@ -119,7 +135,8 @@ AppSideService({
                         data: {
                         result: {
                             urlConfig: getUrlConfig(),
-                            updateInterval: getUpdateInterval()
+                            updateInterval: getUpdateInterval(),
+                            disableUpdates: getDisableUpdates()
                         }
                         }
                     });

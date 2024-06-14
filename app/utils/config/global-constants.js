@@ -9,7 +9,6 @@ export const NIGHTSCOUT_APP_ID = "1051061";
 
 export const NIGHTSCOUT_SETTINGS_DEFAULTS = {
     disableUpdates: false,
-    showLog: false,
 };
 
 export const NIGHTSCOUT_ALARM_SETTINGS_DEFAULTS = {

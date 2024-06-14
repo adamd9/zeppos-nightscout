@@ -1,5 +1,3 @@
-import {json2str} from "../shared/data";
-import {DebugText} from "../shared/debug";
 import {getGlobal} from "../shared/global";
 import {gettext as getText} from "i18n";
 import {
@@ -22,18 +20,11 @@ import {
     BG_TIME_TEXT,
     BG_TREND_IMAGE,
     BG_VALUE_TEXT,
-    COMMON_BUTTON_SETTINGS,
-    CONFIG_PAGE_SCROLL,
-    DEVICE_TYPE,
     IMG_LOADING_PROGRESS,
     MESSAGE_TEXT,
-    RADIO_OFF,
-    RADIO_ON,
-    TITLE_TEXT,
     VERSION_TEXT,
 } from "../utils/config/styles";
 
-import * as fs from "./../shared/fs";
 import {WatchdripData} from "../utils/nightscout/nightscout-data";
 import {getDataTypeConfig, img} from "../utils/helper";
 import {gotoSubpage} from "../shared/navigate";
@@ -47,10 +38,6 @@ const {messageBuilder} = getApp()._options.globalData;
 const {appId} = hmApp.packageInfo();
 
 /*
-typeof DebugText
-*/
-var debug = null;
-/*
 typeof Watchdrip
 */
 var nightscout = null;
@@ -59,7 +46,6 @@ const GoBackType = {NONE: 'none', GO_BACK: 'go_back', HIDE_PAGE: 'hide_page', HI
 const PagesType = {
     MAIN: 'main',
     UPDATE_LOCAL: 'update_local',
-    CONFIG: 'config',
 };
 const FetchMode = {DISPLAY: 'display', HIDDEN: 'hidden'};
 
@@ -83,14 +69,12 @@ class Watchdrip {
         this.conf = new WatchdripConfig();
         this.retriever = new NightscoutRetriever();
 
-        debug.setEnabled(this.conf.settings.showLog);
-
         this.infoFile = new Path("full", WF_INFO_FILE);
     }
 
     start(data) {
-        debug.log("start");
-        debug.log(data);
+        logger.debug("start");
+        logger.debug(data);
         let pageTitle = '';
         this.goBackType = GoBackType.NONE;
         switch (data.page) {
@@ -98,10 +82,6 @@ class Watchdrip {
                 let pkg = hmApp.packageInfo();
                 pageTitle = pkg.name
                 this.main_page();
-                break;
-            case PagesType.CONFIG:
-                pageTitle = getText("settings");
-                this.config_page();
                 break;
         }
 
@@ -135,72 +115,11 @@ class Watchdrip {
             this.fetchInfo();
             this.startDataUpdates();
         }
-
-  
-
-        hmUI.createWidget(hmUI.widget.BUTTON, {
-            ...COMMON_BUTTON_SETTINGS,
-            click_func: (button_widget) => {
-                logger.log("going to settings page")
-                gotoSubpage(PagesType.CONFIG);
-            },
-        });
-    }
-
-    getConfigData() {
-        let dataList = [];
-
-        Object.entries(this.conf.settings).forEach(entry => {
-            const [key, value] = entry;
-            let stateImg = RADIO_OFF
-            if (value) {
-                stateImg = RADIO_ON
-            }
-            dataList.push({
-                key: key,
-                name: getText(key),
-                state_src: img('icons/' + stateImg)
-            });
-        });
-        this.configDataList = dataList;
-
-        let dataTypeConfig = [
-            getDataTypeConfig(1, 0, dataList.length)
-        ]
-        return {
-            data_array: dataList,
-            data_count: dataList.length,
-            data_type_config: dataTypeConfig,
-            data_type_config_count: dataTypeConfig.length
-        }
-    }
-
-    config_page() {
-        hmUI.setLayerScrolling(false);
-
-        this.configScrollList = hmUI.createWidget(hmUI.widget.SCROLL_LIST,
-            {
-                ...CONFIG_PAGE_SCROLL,
-                item_click_func: (list, index) => {
-                    debug.log(index);
-                    const key = this.configDataList[index].key
-                    let val = this.conf.settings[key]
-                    this.conf.settings[key] = !val;
-                    this.conf.settingsTime = this.timeSensor.utc; // upd settings time
-                    //update list
-                    this.configScrollList.setProperty(hmUI.prop.UPDATE_DATA, {
-                        ...this.getConfigData(),
-                        //Refresh the data and stay on the current page. If it is not set or set to 0, it will return to the top of the list.
-                        on_page: 1
-                    })
-                },
-                ...this.getConfigData()
-            });
     }
 
     startDataUpdates() {
         if (this.intervalTimer != null) return; //already started
-        debug.log("startDataUpdates");
+        logger.debug("startDataUpdates");
         this.intervalTimer = this.globalNS.setInterval(() => {
             this.checkUpdates();
         }, DATA_TIMER_UPDATE_INTERVAL_MS);
@@ -208,7 +127,7 @@ class Watchdrip {
 
     stopDataUpdates() {
         if (this.intervalTimer !== null) {
-            //debug.log("stopDataUpdates");
+            //logger.debug("stopDataUpdates");
             this.globalNS.clearInterval(this.intervalTimer);
             this.intervalTimer = null;
         }
@@ -224,10 +143,10 @@ class Watchdrip {
     handleRareCases() {
         let fetch = false;
         if (this.lastUpdateAttempt == null) {
-            debug.log("initial fetch");
+            logger.debug("initial fetch");
             fetch = true;
         } else if (this.isTimeout(this.lastUpdateAttempt, DATA_STALE_TIME_MS)) {
-            debug.log("the side app not responding, force update again");
+            logger.debug("the side app not responding, force update again");
             fetch = true;
         }
         if (fetch) {
@@ -236,10 +155,10 @@ class Watchdrip {
     }
 
     checkUpdates() {
-        //debug.log("checkUpdates");
+        //logger.debug("checkUpdates");
         this.updateTimesWidget();
         if (this.updatingData) {
-            //debug.log("updatingData, return");
+            //logger.debug("updatingData, return");
             return;
         }
         let lastInfoUpdate = this.readLastUpdate();
@@ -249,14 +168,14 @@ class Watchdrip {
             if (this.lastUpdateSucessful) {
                 if (this.lastInfoUpdate !== lastInfoUpdate) {
                     //update widgets because the data was modified outside the current scope
-                    debug.log("update from remote");
+                    logger.debug("update from remote");
                     this.readInfo();
                     this.lastInfoUpdate = lastInfoUpdate;
                     this.updateWidgets();
                     return;
                 }
                 if (this.isTimeout(lastInfoUpdate, this.updateIntervals)) {
-                    debug.log("reached updateIntervals");
+                    logger.debug("reached updateIntervals");
                     this.fetchInfo();
                     return;
                 }
@@ -264,15 +183,15 @@ class Watchdrip {
                 const statusNowOlder = this.isTimeout(this.nightscoutData.getStatus().now, NIGHTSCOUT_UPDATE_INTERVAL_MS);
                 if (bgTimeOlder || statusNowOlder) {
                     if (!this.isTimeout(this.lastUpdateAttempt, DATA_STALE_TIME_MS)) {
-                        debug.log("wait DATA_STALE_TIME");
+                        logger.debug("wait DATA_STALE_TIME");
                         return;
                     }
-                    debug.log("data older than sensor update interval");
+                    logger.debug("data older than sensor update interval");
                     this.fetchInfo();
                     return;
                 }
                 //data not modified from outside scope so nothing to do
-                debug.log("data not modified");
+                logger.debug("data not modified");
             } else {
                 this.handleRareCases();
             }
@@ -280,7 +199,7 @@ class Watchdrip {
     }
 
     fetch_page() {
-        debug.log("fetch_page");
+        logger.debug("fetch_page");
 
         hmUI.setStatusBarVisible(false);
         if (this.conf.settings.disableUpdates) {
@@ -310,8 +229,12 @@ class Watchdrip {
 
         try {
             if (data.error) {
-                debug.log("Error");
-                debug.log(data);
+                if (data.message === "Only absolute URLs are supported") {
+                    this.showMessage("Configure App Settings on Phone (ZeppOS App)");
+                    return
+                }
+                logger.debug("Error");
+                logger.debug(data);
                 this.showMessage("Error: " + data.message);
                 return;
             }
@@ -325,7 +248,7 @@ class Watchdrip {
 
             this.updateWidgets();
         } catch (e) {
-            debug.log("error:" + e);
+            logger.debug("error:" + e);
         }  
 
         this.updatingData = false;
@@ -354,7 +277,7 @@ class Watchdrip {
     }
 
     updateWidgets() {
-        debug.log('updateWidgets');
+        logger.debug('updateWidgets');
         this.setMessageVisibility(false);
         this.setBgElementsVisibility(true);
         this.updateValuesWidget()
@@ -379,7 +302,7 @@ class Watchdrip {
             text: bgObj.delta + " " + this.nightscoutData.getStatus().getUnitText()
         });
 
-        //debug.log(bgObj.getArrowResource());
+        //logger.debug(bgObj.getArrowResource());
         this.bgTrendImageWidget.setProperty(hmUI.prop.SRC, bgObj.getArrowResource());
         this.bgStaleLine.setProperty(hmUI.prop.VISIBLE, this.nightscoutData.isBgStale());
     }
@@ -400,7 +323,7 @@ class Watchdrip {
         //     text_width: MESSAGE_TEXT_WIDTH,
         //     wrapped: 1
         // });
-        // debug.log(lay);
+        // logger.debug(lay);
         this.messageTextWidget.setProperty(hmUI.prop.MORE, {text: text});
         this.setMessageVisibility(true);
     }
@@ -420,7 +343,7 @@ class Watchdrip {
     readInfo() {
         let data = this.infoFile.fetchJSON();
         if (data) {
-                debug.log("data was read");
+                logger.debug("data was read");
                 this.nightscoutData.setData(data);
                 this.nightscoutData.timeDiff = 0;
             data = null;
@@ -430,7 +353,7 @@ class Watchdrip {
     }
 
     readLastUpdate() {
-        debug.log("readLastUpdate");
+        logger.debug("readLastUpdate");
         this.conf.read();
         this.lastUpdateAttempt = this.conf.infoLastUpdAttempt;
         this.lastUpdateSucessful = this.conf.infoLastUpdSucess;
@@ -439,7 +362,7 @@ class Watchdrip {
     }
 
     resetLastUpdate() {
-        debug.log("resetLastUpdate");
+        logger.debug("resetLastUpdate");
         this.lastUpdateAttempt = this.timeSensor.utc;
         this.lastUpdateSucessful = false;
         this.conf.infoLastUpdAttempt = this.lastUpdateAttempt
@@ -454,7 +377,7 @@ class Watchdrip {
     }
 
     saveInfo(info) {
-        debug.log("saveInfo");
+        logger.debug("saveInfo");
         this.infoFile.overrideWithText(info);
         this.lastUpdateSucessful = true;
         let time = this.timeSensor.utc;
@@ -486,8 +409,6 @@ class Watchdrip {
 Page({
     onInit(p) {
         try {
-            debug = new DebugText();
-            debug.setLines(20);
             console.log("page onInit");
             let data = {page: PagesType.MAIN};
             try {
@@ -501,8 +422,8 @@ Page({
             nightscout = new Watchdrip()
             nightscout.start(data);
         } catch (e) {
-            debug.log('LifeCycle Error ' + e)
-            e && e.stack && e.stack.split(/\n/).forEach((i) => debug.log('error stack:' + i))
+            logger.debug('LifeCycle Error ' + e)
+            e && e.stack && e.stack.split(/\n/).forEach((i) => logger.debug('error stack:' + i))
         }
     },
     build() {

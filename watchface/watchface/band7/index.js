@@ -15,7 +15,7 @@ import { str2json } from "../../shared/data";
 
 const logger = getApp()._options.globalData.logger
 
-let bgValTextImgWidget, bgValTimeTextWidget
+let bgValTextImgWidget, bgValTimeTextWidget, bgTrendImageWidget
 let timerLastUpdated, currTime;
 
 function mergeStyles(styleObj1, styleObj2, styleObj3 = {}) {
@@ -39,7 +39,7 @@ WatchFace({
           try {
             self.updateValues()
           } catch (error) {
-            logger.log(error)
+            logger.log("timer error: " + error)
           }
         }
         timerLastUpdated = currTime
@@ -143,7 +143,11 @@ WatchFace({
       bgValTimeTextWidget.setProperty(hmUI.prop.VISIBLE, true)
       bgValTimeTextWidget.setProperty(hmUI.prop.TEXT, bgTimeInMinutes.toString() + ' min')
 
+      // hmUI.deleteWidget(bgTrendImageWidget)
+      // bgTrendImageWidget = hmUI.createWidget(hmUI.widget.IMG, BG_TREND_IMAGE);
+      bgTrendImageWidget.setProperty(hmUI.prop.VISIBLE, false)
       bgTrendImageWidget.setProperty(hmUI.prop.SRC, this.getArrowResource(dataInfo.bg.trend));
+      bgTrendImageWidget.setProperty(hmUI.prop.VISIBLE, true)
     } else {
       logger.log("latest info is an error", dataInfo)
       bgValTextImgWidget.setProperty(hmUI.prop.VISIBLE, true)

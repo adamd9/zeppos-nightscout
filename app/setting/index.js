@@ -4,7 +4,8 @@ import { gettext } from 'i18n';
 const DEFAULT_SETTINGS = {
   urlConfig: '',
   accessToken: '',
-  updateInterval: 3 // Default interval in minutes
+  updateInterval: 3, // Default interval in minutes
+  disableUpdates: false,
 };
 
 AppSettingsPage({
@@ -16,7 +17,8 @@ AppSettingsPage({
     this.state.settings = {
       urlConfig: this.getUrlConfig(),
       accessToken: this.getAccessToken(),
-      updateInterval: this.getUpdateInterval()
+      updateInterval: this.getUpdateInterval(),
+      disableUpdates: this.getDisableUpdates(),
     };
   },
   // Retrieve URL Configuration from storage or use default
@@ -48,6 +50,15 @@ AppSettingsPage({
   setUpdateInterval(value) {
     this.state.settings.updateInterval = value;
     this.state.props.settingsStorage.setItem('updateInterval', JSON.stringify(value));
+  },
+  getDisableUpdates() {
+    const storedDisableUpdates = this.state.props.settingsStorage.getItem('disableUpdates');
+    return storedDisableUpdates ? JSON.parse(storedDisableUpdates) : DEFAULT_SETTINGS.disableUpdates;
+  },
+  // Update Disable Updates
+  setDisableUpdates(value) {
+    this.state.settings.disableUpdates = value;
+    this.state.props.settingsStorage.setItem('disableUpdates', JSON.stringify(value));
   },
   // Component initialization
   build(props) {
@@ -138,6 +149,13 @@ AppSettingsPage({
             }
           }
         }),
+        Toggle({
+          label: 'Disable updates',
+          value: this.state.settings.disableUpdates,
+          onChange: (val) => {
+            this.setDisableUpdates(val);
+          }
+        }),      
         Text({
           paragraph: true,
           style: {

@@ -13,9 +13,6 @@ msgstr "Add treatment"
 msgid "disableUpdates"
 msgstr "Disable updates"
 
-msgid "showLog"
-msgstr "Show log"
-
 msgid "data_upd_disabled"
 msgstr "Data updates disabled"
 

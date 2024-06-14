@@ -1,4 +1,4 @@
-const logger = Logger.getLogger("wf-nightscout");
+const logger = DeviceRuntimeCore.HmLogger.getLogger('wf-nightscout')
 
 App({
   globalData: {

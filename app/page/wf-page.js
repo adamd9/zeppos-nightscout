@@ -1,4 +1,3 @@
-import {DebugText} from "../shared/debug";
 import {getGlobal} from "../shared/global";
 import {
     DATA_STALE_TIME_MS,
@@ -12,10 +11,6 @@ const logger = DeviceRuntimeCore.HmLogger.getLogger("nightscout_app");
 
 const {appId} = hmApp.packageInfo();
 
-/*
-typeof DebugText
-*/
-var debug = null;
 /*
 typeof Watchdrip
 */
@@ -51,13 +46,12 @@ class Watchdrip {
         this.fetchMode = FetchMode.DISPLAY;
         this.conf = new WatchdripConfig();
         this.retriever = new NightscoutRetriever();
-        debug.setEnabled(this.conf.settings.showLog);
 
     }
 
     start(data) {
-        debug.log("start");
-        debug.log(data);
+        logger.debug("start");
+        logger.debug(data);
         this.conf.alarmSettings = {...this.conf.alarmSettings, ...data.params};
         this.prepareNextAlarm()
         this.retriever.fetchInfo(this.retrieve_complete.bind(this));
@@ -65,10 +59,10 @@ class Watchdrip {
 
     retrieve_complete(info) {
         if(!info) {
-            debug.log("Something went wrong retrieving the data")
+            logger.debug("Something went wrong retrieving the data")
         } else {
         if (info && info.error) {
-            debug.log("Error retrieving data", info.message)
+            logger.debug("Error retrieving data", info.message)
         }
         if (info && info.settings && info.settings.updateInterval && 
             info.settings.updateInterval !== this.conf.alarmSettings.fetchInterval / 60) {
@@ -99,7 +93,7 @@ class Watchdrip {
 
 
     readLastUpdate() {
-        debug.log("readLastUpdate");
+        logger.debug("readLastUpdate");
         this.conf.read();
         this.lastUpdateAttempt = this.conf.infoLastUpdAttempt;
         this.lastUpdateSucessful = this.conf.infoLastUpdSucess;
@@ -108,7 +102,7 @@ class Watchdrip {
     }
 
     resetLastUpdate() {
-        debug.log("resetLastUpdate");
+        logger.debug("resetLastUpdate");
         this.lastUpdateAttempt = this.timeSensor.utc;
         this.lastUpdateSucessful = false;
         this.conf.infoLastUpdAttempt = this.lastUpdateAttempt
@@ -116,15 +110,15 @@ class Watchdrip {
     }
 
     saveAlarmId(alarm_id) {
-        debug.log("saveAlarmId");
+        logger.debug("saveAlarmId");
         this.conf.alarm_id = alarm_id;
     }
 
     disableCurrentAlarm() {
-        debug.log("disableCurrentAlarm");
+        logger.debug("disableCurrentAlarm");
         const alarm_id = this.conf.alarm_id; //read saved alarm to disable
         if (alarm_id && alarm_id !== -1) {
-            debug.log("stop old app alarm");
+            logger.debug("stop old app alarm");
             hmApp.alarmCancel(alarm_id);
             this.saveAlarmId('-1');
         }
@@ -138,7 +132,7 @@ class Watchdrip {
             }
             return;
         }
-        debug.log("Next alarm in " + this.conf.alarmSettings.fetchInterval + "s");
+        logger.debug("Next alarm in " + this.conf.alarmSettings.fetchInterval + "s");
         if (this.system_alarm_id == null) {
             this.system_alarm_id = hmApp.alarmNew({
                 appid: appId,
@@ -168,8 +162,6 @@ class Watchdrip {
 Page({
     onInit(p) {
         try {
-            debug = new DebugText();
-            debug.setLines(20);
             console.log("page onInit");
             let data = {page: PagesType.MAIN};
             try {
@@ -183,8 +175,8 @@ Page({
             nightscout = new Watchdrip()
             nightscout.start(data);
         } catch (e) {
-            debug.log('LifeCycle Error ' + e)
-            e && e.stack && e.stack.split(/\n/).forEach((i) => debug.log('error stack:' + i))
+            logger.debug('LifeCycle Error ' + e)
+            e && e.stack && e.stack.split(/\n/).forEach((i) => logger.debug('error stack:' + i))
         }
     },
     build() {
