@@ -144,7 +144,7 @@ export const BG_VALUE_NO_DATA_TEXT = {
 
 export const BG_VALUE_TEXT_IMG = {
     x: px(46),
-    y: px(150),
+    y: px(170),
     w: px(113),
     align_h: hmUI.align.CENTER_H,
     dot_image: img('bgNum/d.png'),
@@ -156,7 +156,7 @@ export const BG_VALUE_TEXT_IMG = {
 
 export const BG_VALUE_TEXT_IMG_AOD = {
     x: px(46),
-    y: px(164),
+    y: px(184),
     w: px(113),
     dot_image: img('bigNumAOD/d.png'),
     font_array: bigNumAODArr,
@@ -192,7 +192,7 @@ export const BG_DELTA_TEXT = {
 export const BG_TREND_IMAGE = {
     src: 'nightscout/arrows/None.png',
     x: px(75),
-    y: px(218),
+    y: px(238),
     w: px(60),
     h: px(41),
     show_level: hmUI.show_level.ONLY_NORMAL

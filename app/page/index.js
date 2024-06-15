@@ -45,7 +45,6 @@ var nightscout = null;
 const GoBackType = {NONE: 'none', GO_BACK: 'go_back', HIDE_PAGE: 'hide_page', HIDE: 'hide'};
 const PagesType = {
     MAIN: 'main',
-    UPDATE_LOCAL: 'update_local',
 };
 const FetchMode = {DISPLAY: 'display', HIDDEN: 'hidden'};
 
@@ -239,8 +238,11 @@ class Watchdrip {
                 return;
             }
 
+            hmFS.SysProSetChars('fs_last_info', JSON.stringify(data))
+
             let dataInfo = data;
             this.lastInfoUpdate = this.saveInfo(data);
+            
             data = null;
             this.nightscoutData.setData(dataInfo);
             this.nightscoutData.updateTimeDiff();
@@ -309,8 +311,15 @@ class Watchdrip {
 
     updateTimesWidget() {
         let bgObj = this.nightscoutData.getBg();
+        if (!bgObj.time) {
+            return;
+        }
+        const currentTime = Date.now(); // Current time in milliseconds
+        const differenceInMillis = currentTime - bgObj.time; // Difference in milliseconds
+        // Convert milliseconds to minutes
+        let bgTimeInMinutes = Math.round(differenceInMillis / 60000);
         this.bgValTimeTextWidget.setProperty(hmUI.prop.MORE, {
-            text: this.nightscoutData.getTimeAgo(bgObj.time),
+            text: bgTimeInMinutes + 'min',
         });
     }
 

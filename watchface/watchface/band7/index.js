@@ -15,7 +15,7 @@ import { str2json } from "../../shared/data";
 
 const logger = getApp()._options.globalData.logger
 
-let bgValTextImgWidget, bgValTimeTextWidget, bgTrendImageWidget
+let bgValTextImgWidget, bgTrendImageWidget, bgAdditionalTextButtonWidget
 let timerLastUpdated, currTime;
 
 function mergeStyles(styleObj1, styleObj2, styleObj3 = {}) {
@@ -90,21 +90,19 @@ WatchFace({
     //     }, interval);
     // }
 
-    bgValTimeTextWidget = hmUI.createWidget(hmUI.widget.TEXT, BG_TIME_TEXT);
-
-    hmUI.createWidget(hmUI.widget.BUTTON, {
+    bgAdditionalTextButtonWidget = hmUI.createWidget(hmUI.widget.BUTTON, {
       x: 42,
-      y: 280,
+      y: 300,
       w: 120,
       h: 40,
       radius: 12,
-      normal_color: 0xfc6950,
-      press_color: 0xfeb4a8,
-      text: 'Refresh',
+      normal_color: 0x808080,
+      press_color: 0xB0B0B0,
+      text: '...',
       show_level: hmUI.show_level.ONLY_NORMAL,
       click_func: () => {
         logger.log('Button pressed')
-        hmApp.startApp({ appid: NIGHTSCOUT_APP_ID, url: 'page/wf-page', param: 'update' })
+        hmApp.startApp({ appid: NIGHTSCOUT_APP_ID, url: 'page/index', param: 'main' })
       }
     })
     bgTrendImageWidget = hmUI.createWidget(hmUI.widget.IMG, BG_TREND_IMAGE);
@@ -140,11 +138,10 @@ WatchFace({
         console.error('Invalid or missing bg.time value')
       }
 
-      bgValTimeTextWidget.setProperty(hmUI.prop.VISIBLE, true)
-      bgValTimeTextWidget.setProperty(hmUI.prop.TEXT, bgTimeInMinutes.toString() + ' min')
+      bgAdditionalTextButtonWidget.setProperty(hmUI.prop.VISIBLE, false)
+      bgAdditionalTextButtonWidget.setProperty(hmUI.prop.TEXT, bgTimeInMinutes.toString() + ' min')
+      bgAdditionalTextButtonWidget.setProperty(hmUI.prop.VISIBLE, true)
 
-      // hmUI.deleteWidget(bgTrendImageWidget)
-      // bgTrendImageWidget = hmUI.createWidget(hmUI.widget.IMG, BG_TREND_IMAGE);
       bgTrendImageWidget.setProperty(hmUI.prop.VISIBLE, false)
       bgTrendImageWidget.setProperty(hmUI.prop.SRC, this.getArrowResource(dataInfo.bg.trend));
       bgTrendImageWidget.setProperty(hmUI.prop.VISIBLE, true)
@@ -155,8 +152,9 @@ WatchFace({
 
       bgTrendImageWidget.setProperty(hmUI.prop.SRC, "None");
 
-      bgValTimeTextWidget.setProperty(hmUI.prop.VISIBLE, true)
-      bgValTimeTextWidget.setProperty(hmUI.prop.TEXT, dataInfo.message)
+      bgAdditionalTextButtonWidget.setProperty(hmUI.prop.VISIBLE, false)
+      bgAdditionalTextButtonWidget.setProperty(hmUI.prop.TEXT, dataInfo.message)
+      bgAdditionalTextButtonWidget.setProperty(hmUI.prop.VISIBLE, true)      
     }
   },
 
