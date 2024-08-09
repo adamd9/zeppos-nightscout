@@ -1,17 +1,8 @@
 import {TEST_DATA} from "../../config/constants";
 
 export class StatusData {
-    constructor(now, isMgdl, bat) {
-        this.now = now;
+    constructor(isMgdl) {
         this.isMgdl = isMgdl;
-        this.bat = bat;
-    }
-
-    getBatVal() {
-        if (this.bat === "") {
-            return "--";
-        }
-        return this.bat + "%";
     }
 
     getUnitText() {
@@ -26,9 +17,9 @@ export class StatusData {
 
     static createEmpty() {
         if (TEST_DATA){
-            return new StatusData(1668975954793, true,  58);
+            return new StatusData(true);
         }
-        return new StatusData(null, null, "");
+        return new StatusData(null);
     }
 }
 

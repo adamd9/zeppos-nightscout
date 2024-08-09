@@ -23,7 +23,6 @@ const PagesType = {
     UPDATE_LOCAL: 'update_local',
     HIDE: 'hide',
     CONFIG: 'config',
-    ADD_TREATMENT: 'add_treatment'
 };
 const FetchMode = {DISPLAY: 'display', HIDDEN: 'hidden'};
 
@@ -50,7 +49,7 @@ class Watchdrip {
     }
 
     start(data) {
-        logger.debug("start");
+        logger.debug("wf page start");
         logger.debug(data);
         this.conf.alarmSettings = {...this.conf.alarmSettings, ...data.params};
         this.prepareNextAlarm()
@@ -142,6 +141,8 @@ class Watchdrip {
             });
             this.saveAlarmId(this.system_alarm_id);
         }
+        hmFS.SysProSetChars('fs_last_wf_alarm', Date.now())
+        hmFS.SysProSetChars('fs_last_wf_alarm_interval', this.conf.alarmSettings.fetchInterval)
     }
 
     vibrateNow() {
@@ -151,9 +152,7 @@ class Watchdrip {
     }
 
     onDestroy() {
-        //this.disableCurrentAlarm(); //do not stop alarm on destroy
         this.conf.save();
-        this.stopDataUpdates();
         this.vibrate.stop();
         hmSetting.setBrightScreenCancel();
     }
@@ -180,10 +179,10 @@ Page({
         }
     },
     build() {
-        logger.debug("page build invoked");
+        logger.debug("wf-page build invoked");
     },
     onDestroy() {
-        logger.debug("page onDestroy invoked");
+        logger.debug("wf-page onDestroy invoked");
         nightscout.onDestroy();
     },
 });

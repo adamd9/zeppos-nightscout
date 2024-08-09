@@ -140,6 +140,7 @@ class Watchdrip {
     }
 
     handleRareCases() {
+        logger.debug("rare case handler");
         let fetch = false;
         if (this.lastUpdateAttempt == null) {
             logger.debug("initial fetch");
@@ -164,6 +165,7 @@ class Watchdrip {
         if (!lastInfoUpdate) {
             this.handleRareCases();
         } else {
+            logger.debug("last update was: " + lastInfoUpdate);
             if (this.lastUpdateSucessful) {
                 if (this.lastInfoUpdate !== lastInfoUpdate) {
                     //update widgets because the data was modified outside the current scope
@@ -179,8 +181,7 @@ class Watchdrip {
                     return;
                 }
                 const bgTimeOlder = this.isTimeout(this.nightscoutData.getBg().time, NIGHTSCOUT_UPDATE_INTERVAL_MS);
-                const statusNowOlder = this.isTimeout(this.nightscoutData.getStatus().now, NIGHTSCOUT_UPDATE_INTERVAL_MS);
-                if (bgTimeOlder || statusNowOlder) {
+                if (bgTimeOlder) {
                     if (!this.isTimeout(this.lastUpdateAttempt, DATA_STALE_TIME_MS)) {
                         logger.debug("wait DATA_STALE_TIME");
                         return;
@@ -245,12 +246,11 @@ class Watchdrip {
             
             data = null;
             this.nightscoutData.setData(dataInfo);
-            this.nightscoutData.updateTimeDiff();
             dataInfo = null;
 
             this.updateWidgets();
         } catch (e) {
-            logger.debug("error:" + e);
+            logger.debug("error:" + e.message);
         }  
 
         this.updatingData = false;
@@ -354,7 +354,6 @@ class Watchdrip {
         if (data) {
                 logger.debug("data was read");
                 this.nightscoutData.setData(data);
-                this.nightscoutData.timeDiff = 0;
             data = null;
             return true
         }
@@ -436,10 +435,10 @@ Page({
         }
     },
     build() {
-        logger.debug("page build invoked");
+        logger.debug("index.js page build invoked");
     },
     onDestroy() {
-        logger.debug("page onDestroy invoked");
+        logger.debug("index.js page onDestroy invoked");
         nightscout.onDestroy();
     },
 });

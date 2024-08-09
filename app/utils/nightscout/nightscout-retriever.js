@@ -13,8 +13,7 @@ const {messageBuilder} = getApp()._options.globalData;
 export class NightscoutRetriever {
     constructor() {
         this.lastInfoUpdate = null;
-        this.lastUpdateSucessful = false; // This needs to be set somewhere in your logic
-        // ... Additional properties as needed for your class
+        this.lastUpdateSucessful = false;
     }
 
     fetchInfo(callback) {
